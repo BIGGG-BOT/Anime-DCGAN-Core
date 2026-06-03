@@ -33,6 +33,6 @@ def save_img(tensor, fp):
 
     grid = make_grid(tensor)
     ndarr = (grid.mul(0.5).add_(0.5)).mul(255).permute(1, 2, 0).to('cpu', torch.uint8).numpy()
-    im = Image.fromarray(ndarr, mode='RGB')
+    im = Image.fromarray(ndarr)
     im.save(fp)
 

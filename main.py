@@ -3,11 +3,12 @@ import torch.nn as nn
 from torchvision import transforms
 from create_dataset import My_dataset, save_img
 from torch.utils.data import DataLoader
+# from model512 import Generator, Discriminator
 from model64 import Generator, Discriminator
 
 # 图像变换
 transform = transforms.Compose([
-    transforms.Resize((64, 64)),  # 网络设置图片大小为 64*64,保证图片大小符合网络结构要求
+    transforms.Resize((64, 64)),  # 网络设置图片大小为 512*512
     transforms.ToTensor(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 ])
@@ -21,6 +22,7 @@ discriminator = Discriminator()
 generator = Generator()
 
 if torch.cuda.is_available():
+
     discriminator = discriminator.cuda()
     generator = generator.cuda()
 
@@ -33,29 +35,28 @@ for epoch in range(epochs):
 
     for i, img in enumerate(my_dataloader):
 
-        noise = torch.randn(batch_size, 100).cuda() # 随机噪声作为输入
+        noise = torch.randn(batch_size, 100, 1, 1).cuda()
         real_img = img.cuda()
         fake_img = generator(noise)
 
-
+        real_label = torch.ones(batch_size).cuda()
+        fake_label = torch.zeros(batch_size).cuda()
         real_out = discriminator(real_img)
         fake_out = discriminator(fake_img)
-        real_label = torch.ones_like(real_out).cuda()  # 真实图片标签为1，生成图片标签为0
-        fake_label = torch.zeros_like(fake_out).cuda()
         real_loss = criterion(real_out, real_label)
         fake_loss = criterion(fake_out, fake_label)
 
-        d_loss = real_loss + fake_loss  # 训练判别器
+        d_loss = real_loss + fake_loss
         d_optimizer.zero_grad()
 
         d_loss.backward()
         d_optimizer.step()
 
-        noise = torch.randn(batch_size, 100).cuda()
+        noise = torch.randn(batch_size, 100, 1, 1).cuda()
         fake_img = generator(noise)
         output = discriminator(fake_img)
 
-        g_loss = criterion(output, real_label)   # 训练生成器
+        g_loss = criterion(output, real_label)
         g_optimizer.zero_grad()
 
         g_loss.backward()

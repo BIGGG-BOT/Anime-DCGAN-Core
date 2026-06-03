@@ -25,6 +25,18 @@ class Generator(nn.Module):
             nn.BatchNorm2d(32),
             nn.ReLU(),
             # out_shape = (32-1)*2-2*1+4 = 64*64
+            nn.ConvTranspose2d(32, 32, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            # out_shape = (64-1)*2-2*1+4 = 128*128
+            nn.ConvTranspose2d(32, 32, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            # out_shape = (128-1)*2-2*1+4 = 256*256
+            nn.ConvTranspose2d(32, 32, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            # out_shape = (128-1)*2-2*1+4 = 512*512
             nn.ConvTranspose2d(32, 3, kernel_size=4, stride=2, padding=1),
             nn.Tanh()
         )
@@ -39,16 +51,25 @@ class Discriminator(nn.Module):
     def __init__(self):
         super(Discriminator, self).__init__()
         self.net = nn.Sequential(
-            # out_shape = 32*32*32
-            nn.Conv2d(3, 32, kernel_size=3, stride=2, padding=1),
+            # out_shape = 4*256*256
+            nn.Conv2d(3, 4, kernel_size=3, stride=2, padding=1),
             nn.LeakyReLU(0.2),
-            # out_shape = 16*16*64
+            # out_shape = 8*128*128
+            nn.Conv2d(4, 8, kernel_size=3, stride=2, padding=1),
+            nn.LeakyReLU(0.2),
+            # out_shape = 16*64*64
+            nn.Conv2d(8, 16, kernel_size=3, stride=2, padding=1),
+            nn.LeakyReLU(0.2),
+            # out_shape = 32*32*32
+            nn.Conv2d(16, 32, kernel_size=3, stride=2, padding=1),
+            nn.LeakyReLU(0.2),
+            # out_shape = 64*16*16
             nn.Conv2d(32, 64, kernel_size=3, stride=2, padding=1),
             nn.LeakyReLU(0.2),
-            # out_shape = 8*8*128
+            # out_shape = 128*8*8
             nn.Conv2d(64, 128, kernel_size=3, stride=2, padding=1),
             nn.LeakyReLU(0.2),
-            # out_shape = 4*4*256
+            # out_shape = 256*4*4
             nn.Conv2d(128, 256, kernel_size=3, stride=2, padding=1),
             nn.LeakyReLU(0.2),
             nn.Flatten(),
@@ -62,5 +83,3 @@ class Discriminator(nn.Module):
 
         output = self.net(input)
         return output.view(-1)
-
-
